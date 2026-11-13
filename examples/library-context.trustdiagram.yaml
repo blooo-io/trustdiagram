@@ -1,0 +1,22 @@
+# Example: system context of a library loan system (C4 level 1), placed automatically.
+trustdiagram: 1
+id: library-context
+title: Library loan system — system context
+kind: flow
+description: >
+  Members search the catalogue and borrow books; librarians manage loans and returns.
+  The system relies on the city's identity provider, an email service and a book data provider.
+model:
+  elements:
+    - { id: member, type: person, name: Library member }
+    - { id: librarian, type: person, name: Librarian }
+    - { id: library, type: system, name: Library loan system, description: "Catalogue, loans, reservations and reminders." }
+    - { id: idp, type: external, name: City identity provider, tech: OpenID Connect }
+    - { id: mail, type: external, name: Email service }
+    - { id: books, type: external, name: Book data provider, tech: ISBN API }
+  relations:
+    - { id: c-search, from: member, to: library, label: searches and borrows, protocol: HTTPS }
+    - { id: c-manage, from: librarian, to: library, label: manages loans, protocol: HTTPS }
+    - { id: c-login, from: library, to: idp, label: authenticates users, protocol: OIDC }
+    - { id: c-remind, from: library, to: mail, label: sends reminders, protocol: SMTP, mode: async }
+    - { id: c-books, from: library, to: books, label: imports book data, mode: async }

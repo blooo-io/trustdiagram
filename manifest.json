@@ -1,0 +1,10 @@
+{
+  "id": "trustdiagram",
+  "name": "TrustDiagram",
+  "version": "0.8.0",
+  "minAppVersion": "1.8.7",
+  "description": "Architecture diagrams as code: render and edit trustdiagram blocks, checked against their model. This plugin is closed source.",
+  "author": "Blooo",
+  "authorUrl": "https://blooo.io",
+  "isDesktopOnly": true
+}

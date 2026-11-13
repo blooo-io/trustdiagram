@@ -1,0 +1,70 @@
+trustdiagram: 1
+id: plateforme-ia-exposition
+kind: flow
+title: Plateforme IA — exposition et criticité des composants
+description: >
+  Exemple de propriétés, de classes et de règles d'affichage : chaque composant porte sa criticité,
+  son exposition sur Internet, sa version et son responsable ; les règles en tirent l'aspect du schéma.
+model:
+  classes:
+    - id: composant
+      name: Composant applicatif
+      properties:
+        responsable: null          # à renseigner sur chaque composant
+        criticité: moyenne
+        exposé_internet: false
+        version: null
+  elements:
+    - id: internet
+      type: zone
+      name: Internet
+      children:
+        - id: portail
+          type: container
+          name: Portail conversationnel
+          tech: Chainlit {{version}}
+          classes: [composant]
+          properties: { version: 2.3, exposé_internet: true, responsable: Équipe Canaux }
+    - id: si
+      type: zone
+      name: SI interne
+      children:
+        - id: passerelle
+          type: container
+          name: Passerelle LLM
+          tech: LiteLLM {{version}}
+          classes: [composant]
+          properties: { version: 1.40, criticité: haute, responsable: Équipe Plateforme }
+        - id: orchestrateur
+          type: container
+          name: Orchestrateur RAG
+          tech: Python {{version}}
+          classes: [composant]
+          properties: { version: 0.9, criticité: haute }
+        - id: index
+          type: datastore
+          name: Index documentaire
+          tech: Azure AI Search
+          classes: [composant]
+          properties: { responsable: Équipe Données }
+  relations:
+    - { id: r1, from: portail, to: orchestrateur, label: Questions, protocol: HTTPS, properties: { chiffré: true } }
+    - { id: r2, from: orchestrateur, to: passerelle, label: Inférence, protocol: HTTPS, properties: { chiffré: true } }
+    - { id: r3, from: orchestrateur, to: index, label: Recherche, protocol: HTTP, properties: { chiffré: false } }
+layout:
+  rules:
+    - name: Exposé sur Internet
+      when: { exposé_internet: true }
+      then: { stroke: "#C0392B", width: 2, icon: { name: globe, position: top-right } }
+    - name: Composant critique
+      when: { criticité: haute }
+      then: { fill: "#FDEEDB", icon: { name: flame, position: top-left, color: "#B4540A" } }
+    - name: Version préliminaire
+      when: { version: { lt: 1 } }
+      then: { icon: { name: triangle-alert, position: bottom-right, color: "#A63A2C" } }
+    - name: Sans responsable
+      when: { responsable: { set: false } }
+      then: { dash: dashed }
+    - name: Flux en clair
+      when: { chiffré: false }
+      then: { stroke: "#C0392B", dash: dashed }

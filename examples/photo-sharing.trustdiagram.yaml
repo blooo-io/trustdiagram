@@ -1,0 +1,57 @@
+# Example: a photo sharing app in tiers, placed automatically from top to bottom (`direction: down`):
+# clients at the top, data at the bottom.
+trustdiagram: 1
+id: photo-sharing-deployment
+title: Photo sharing app — deployment
+kind: flow
+description: >
+  Mobile and web clients go through a CDN and an API gateway. Services store photos in object
+  storage, resize them asynchronously and build each user's feed from a database and a cache.
+model:
+  elements:
+    - id: clients
+      type: zone
+      name: Clients
+      children:
+        - { id: mobile, type: container, name: Mobile app, tech: "Swift, Kotlin" }
+        - { id: webapp, type: container, name: Web app, tech: React }
+    - id: edge
+      type: zone
+      name: Edge
+      children:
+        - { id: cdn, type: node, name: CDN }
+        - { id: gateway, type: node, name: API gateway, tech: OAuth 2 }
+    - id: services
+      type: zone
+      name: Services
+      children:
+        - { id: photos, type: container, name: Photo service, tech: Go }
+        - { id: feed, type: container, name: Feed service, tech: Kotlin }
+        - { id: resize, type: component, name: Resize function, tech: serverless, properties: { status: new } }
+    - id: data
+      type: zone
+      name: Data
+      children:
+        - { id: bucket, type: datastore, name: Object storage, tech: S3 API }
+        - { id: db, type: datastore, name: Metadata, tech: PostgreSQL }
+        - { id: cache, type: datastore, name: Feed cache, tech: Redis }
+  relations:
+    - { id: m-gw, from: mobile, to: gateway, protocol: HTTPS }
+    - { id: w-gw, from: webapp, to: gateway, protocol: HTTPS }
+    - { id: w-cdn, from: webapp, to: cdn, label: images }
+    - { id: cdn-b, from: cdn, to: bucket, label: cache miss }
+    - { id: gw-ph, from: gateway, to: photos, label: upload }
+    - { id: gw-fd, from: gateway, to: feed, label: feed }
+    - { id: ph-b, from: photos, to: bucket, label: stores }
+    - { id: ph-db, from: photos, to: db, protocol: SQL }
+    - { id: ph-rs, from: photos, to: resize, label: photo uploaded, mode: event }
+    - { id: rs-b, from: resize, to: bucket, label: thumbnails, mode: async }
+    - { id: fd-db, from: feed, to: db, protocol: SQL }
+    - { id: fd-c, from: feed, to: cache }
+layout:
+  # Status colours come from display rules on a plain property (no special keyword).
+  rules:
+    - name: New component
+      when: { status: new }
+      then: { fill: "#0E7C66", stroke: "#0E7C66", color: "#FFFFFF" }
+  direction: down

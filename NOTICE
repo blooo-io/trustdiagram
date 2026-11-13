@@ -1,0 +1,16 @@
+TrustDiagram
+Copyright 2026 Blooo SAS (https://blooo.io)
+
+This product is developed and maintained by Blooo SAS. It is proprietary software,
+see LICENSE. "TrustDiagram" and "Blooo" are names and marks of Blooo SAS.
+
+This product bundles third-party software, each under its own license:
+- maxGraph (@maxgraph/core), Apache License 2.0
+- Kubernetes Icons Set, Apache License 2.0, Copyright The Kubernetes Authors
+- elkjs, Eclipse Public License 2.0 (source: https://github.com/kieler/elkjs)
+- Lucide, ISC License
+- yaml, ISC License
+- Ajv, svgpath, @noble/hashes, MIT License
+- Arimo, Tinos and Cousine fonts, SIL Open Font License 1.1
+
+See docs/LICENSES.md for details.

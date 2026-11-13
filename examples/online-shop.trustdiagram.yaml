@@ -1,0 +1,46 @@
+# Example: a generic online shop, container view. No layout: everything is placed automatically.
+trustdiagram: 1
+id: online-shop-containers
+title: Online shop — containers
+kind: flow
+description: >
+  A customer browses the catalogue and places an order. Payment goes through an external
+  provider; order events feed shipping and analytics asynchronously.
+model:
+  elements:
+    - { id: customer, type: person, name: Customer }
+    - id: platform
+      type: zone
+      name: Shop platform
+      children:
+        - { id: web, type: container, name: Web shop, tech: Next.js, properties: { status: existing } }
+        - { id: api, type: container, name: Orders API, tech: Go, properties: { status: existing } }
+        - { id: catalogue, type: container, name: Catalogue service, tech: Node.js, properties: { status: existing } }
+        - { id: events, type: queue, name: Order events, tech: Kafka, properties: { status: new } }
+        - { id: shipping, type: container, name: Shipping worker, tech: Python, properties: { status: new } }
+        - { id: orders-db, type: datastore, name: Orders, tech: PostgreSQL, properties: { status: existing } }
+        - { id: search, type: datastore, name: Search index, tech: OpenSearch, properties: { status: changed } }
+    - { id: payments, type: external, name: Payment provider, tech: REST API }
+    - { id: warehouse, type: external, name: Warehouse system }
+  relations:
+    - { id: r-browse, from: customer, to: web, label: browses and orders, protocol: HTTPS }
+    - { id: r-order, from: web, to: api, label: places order, protocol: REST, mode: sync }
+    - { id: r-search, from: web, to: catalogue, label: searches, protocol: REST, mode: sync }
+    - { id: r-index, from: catalogue, to: search, protocol: HTTPS }
+    - { id: r-store, from: api, to: orders-db, protocol: SQL }
+    - { id: r-pay, from: api, to: payments, label: charges, protocol: HTTPS, mode: sync }
+    - { id: r-publish, from: api, to: events, label: order placed, mode: event }
+    - { id: r-consume, from: events, to: shipping, mode: event }
+    - { id: r-ship, from: shipping, to: warehouse, label: ships, protocol: SFTP, mode: async }
+layout:
+  # Status colours come from display rules on a plain property (no special keyword).
+  rules:
+    - name: Existing component
+      when: { status: existing }
+      then: { fill: "#E8EDF2", stroke: "#5B6B7C", color: "#243447" }
+    - name: New component
+      when: { status: new }
+      then: { fill: "#0E7C66", stroke: "#0E7C66", color: "#FFFFFF" }
+    - name: Changed component
+      when: { status: changed }
+      then: { fill: "#B4540A", stroke: "#B4540A", color: "#FFFFFF" }

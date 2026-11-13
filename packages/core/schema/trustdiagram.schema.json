@@ -1,0 +1,536 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blooo.io/schemas/trustdiagram/1/trustdiagram.schema.json",
+  "title": "TrustDiagram — schéma d'architecture as code",
+  "description": "Un bloc TrustDiagram décrit une vue d'architecture : `model` porte le sens (pour les humains et les LLM), `layout` porte le dessin (positions, tailles, formes).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trustdiagram",
+    "id",
+    "kind",
+    "model"
+  ],
+  "properties": {
+    "trustdiagram": {
+      "const": 1,
+      "description": "Version du format TrustDiagram."
+    },
+    "id": {
+      "$ref": "#/$defs/id",
+      "description": "Identifiant stable du schéma, utilisé pour la synchronisation."
+    },
+    "title": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "flow",
+        "sequence"
+      ],
+      "description": "flow : boîtes et flèches ; sequence : diagramme de séquence (phase 6)."
+    },
+    "description": {
+      "type": "string"
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ],
+      "properties": {
+        "classes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/class"
+          },
+          "description": "Classes du schéma : modèles de propriétés réutilisables."
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/element"
+          }
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/relation"
+          }
+        }
+      }
+    },
+    "layout": {
+      "$ref": "#/$defs/layout"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-_]*$"
+    },
+    "style": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean"
+        ]
+      }
+    },
+    "point": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "element": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "enum": [
+            "person",
+            "system",
+            "container",
+            "component",
+            "datastore",
+            "queue",
+            "node",
+            "zone",
+            "group",
+            "external"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tech": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "string",
+          "description": "Lien vers une note, ex. [[Passerelle LLM]]."
+        },
+        "properties": {
+          "$ref": "#/$defs/props"
+        },
+        "classes": {
+          "$ref": "#/$defs/classRefs"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/element"
+          }
+        }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "from",
+        "to"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "from": {
+          "$ref": "#/$defs/id"
+        },
+        "to": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string"
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "sync",
+            "async",
+            "event"
+          ]
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "properties": {
+          "$ref": "#/$defs/props"
+        },
+        "classes": {
+          "$ref": "#/$defs/classRefs"
+        }
+      }
+    },
+    "nodeLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "h": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shape": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)*$"
+        },
+        "style": {
+          "$ref": "#/$defs/style"
+        },
+        "z": {
+          "type": "integer",
+          "description": "Ordre d'empilement parmi les frères (0 par défaut, plus grand = au-dessus)."
+        },
+        "layer": {
+          "$ref": "#/$defs/id",
+          "description": "Calque de l'élément (premier niveau ; les enfants héritent)."
+        }
+      }
+    },
+    "edgeLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "route": {
+          "enum": [
+            "orthogonal",
+            "straight",
+            "curved"
+          ]
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point"
+          }
+        },
+        "labelPos": {
+          "$ref": "#/$defs/point"
+        },
+        "style": {
+          "$ref": "#/$defs/style"
+        },
+        "sourcePort": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Accroche relative à la boîte : [0..1, 0..1]."
+        },
+        "targetPort": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Accroche relative à la boîte : [0..1, 0..1]."
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "theme": {
+          "description": "Thème du schéma : un nom (ardoise, encre, brique) ou un thème personnalisé.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "base": {
+                  "type": "string"
+                },
+                "ink": {
+                  "type": "string"
+                },
+                "fill": {
+                  "type": "string"
+                },
+                "palette": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 24
+                }
+              }
+            }
+          ]
+        },
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 24,
+          "description": "Couleurs ajoutées au nuancier de ce schéma (#RRVVBB)."
+        },
+        "font": {
+          "enum": [
+            "sans",
+            "serif",
+            "mono"
+          ],
+          "description": "Police de base du texte : sans (Arimo, défaut), serif (Tinos), mono (Cousine)."
+        },
+        "direction": {
+          "enum": [
+            "right",
+            "down",
+            "left",
+            "up"
+          ],
+          "description": "Sens principal du placement automatique (défaut right)."
+        },
+        "jumps": {
+          "enum": [
+            "arc",
+            "none"
+          ],
+          "description": "Sauts en arc aux croisements de flèches (défaut arc)."
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/layer"
+          },
+          "description": "Calques, du fond vers le dessus (le calque « defaut » est implicite, tout en bas)."
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "Règle d'affichage (voir $defs/rule) ; une règle mal écrite donne un avertissement et est ignorée, sans bloquer le schéma."
+          },
+          "description": "Règles d'affichage, dans l'ordre (la dernière vraie l'emporte)."
+        },
+        "nodes": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/nodeLayout"
+          }
+        },
+        "edges": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/edgeLayout"
+          }
+        }
+      }
+    },
+    "layer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "locked": {
+          "type": "boolean"
+        }
+      }
+    },
+    "propValue": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    },
+    "props": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/propValue"
+      },
+      "description": "Propriétés nom / valeur (scalaires)."
+    },
+    "classRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Classes assignées, dans l'ordre (la dernière l'emporte)."
+    },
+    "class": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string"
+        },
+        "properties": {
+          "$ref": "#/$defs/props"
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "when",
+        "then"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "when": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/propValue"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "then": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fill": {
+              "type": "string"
+            },
+            "stroke": {
+              "type": "string"
+            },
+            "width": {
+              "type": "number"
+            },
+            "dash": {
+              "type": "string"
+            },
+            "color": {
+              "type": "string"
+            },
+            "icon": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "position"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "position": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "any": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

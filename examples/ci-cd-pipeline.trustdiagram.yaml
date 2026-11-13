@@ -1,0 +1,59 @@
+# Example: a CI/CD pipeline, fully placed by hand (every element has its position in `layout`).
+trustdiagram: 1
+id: ci-cd-pipeline
+title: CI/CD pipeline — from commit to production
+kind: flow
+description: >
+  A developer pushes code; the pipeline builds, tests and scans it, publishes a container image,
+  deploys it to staging, then promotes it to production after approval. Production is monitored.
+model:
+  elements:
+    - id: dev
+      type: zone
+      name: Development
+      children:
+        - { id: developer, type: person, name: Developer }
+        - { id: repo, type: system, name: Git repository, tech: GitHub }
+    - id: pipeline
+      type: zone
+      name: CI pipeline
+      children:
+        - { id: build, type: component, name: Build, tech: "pnpm, esbuild" }
+        - { id: tests, type: component, name: Tests, tech: "Vitest, Playwright" }
+        - { id: scan, type: component, name: Security scan, tech: CodeQL, properties: { status: new } }
+    - { id: registry, type: datastore, name: Container registry, tech: OCI images }
+    - id: cluster
+      type: zone
+      name: Kubernetes cluster
+      children:
+        - { id: staging, type: node, name: Staging }
+        - { id: production, type: node, name: Production }
+        - { id: monitoring, type: system, name: Monitoring, tech: "Prometheus, Grafana", properties: { status: new } }
+  relations:
+    - { id: r-push, from: developer, to: repo, label: pushes, protocol: git }
+    - { id: r-trigger, from: repo, to: build, label: triggers, mode: event }
+    - { id: r-test, from: build, to: tests }
+    - { id: r-scan, from: tests, to: scan }
+    - { id: r-publish, from: scan, to: registry, label: publishes image }
+    - { id: r-staging, from: registry, to: staging, label: deploys }
+    - { id: r-promote, from: staging, to: production, label: promotes after approval }
+    - { id: r-metrics, from: production, to: monitoring, label: metrics, mode: async }
+layout:
+  # Status colours come from display rules on a plain property (no special keyword).
+  rules:
+    - name: New component
+      when: { status: new }
+      then: { fill: "#0E7C66", stroke: "#0E7C66", color: "#FFFFFF" }
+  nodes:
+    dev: { x: 20, y: 40, w: 220, h: 300 }
+    developer: { x: 50, y: 90, w: 160, h: 60 }
+    repo: { x: 50, y: 210, w: 160, h: 76 }
+    pipeline: { x: 300, y: 40, w: 240, h: 420 }
+    build: { x: 330, y: 90, w: 180, h: 76 }
+    tests: { x: 330, y: 210, w: 180, h: 76 }
+    scan: { x: 330, y: 330, w: 180, h: 76 }
+    registry: { x: 600, y: 330, w: 180, h: 76 }
+    cluster: { x: 840, y: 40, w: 240, h: 420 }
+    staging: { x: 870, y: 330, w: 180, h: 76 }
+    production: { x: 870, y: 210, w: 180, h: 76 }
+    monitoring: { x: 870, y: 90, w: 180, h: 76 }
