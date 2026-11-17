@@ -107,6 +107,21 @@ layout:
 - Chaque entrée tient **sur une ligne** (style flow YAML) pour garder la section courte et les diffs lisibles.
 - Une entrée dont l'id n'existe plus dans `model` est **orpheline** : elle produit un avertissement, est ignorée au rendu et conservée par la fusion.
 
+### Annotations (`layout.notes`)
+
+Les annotations commentent le dessin : post-it, bulles, texte libre, numéros d'étape. Elles **ne font pas partie du modèle** : un lecteur (humain ou LLM) qui ne lit que `model` voit l'architecture sans elles. Ce ne sont pas des éléments : ni relations, ni placement automatique, ni propriétés, ni règles, ni vérification de la mise en page.
+
+```yaml
+layout:
+  notes:                                         # clé = id de note (espace de noms propre, peut reprendre un id d'élément)
+    n1: { x: 40, y: 300, w: 160, h: 70, shape: general.sticky, text: "À valider avec la sécurité" }
+    n2: { x: 10, y: 10, w: 36, h: 36, shape: general.step-number, text: "1", style: { fill: "#0E7C66" } }
+```
+
+- `x`, `y`, `w`, `h` obligatoires (coordonnées absolues) ; `text` optionnel (`\n` = retour à la ligne) ; `style` = les mêmes clés lisibles qu'une boîte.
+- `shape`, parmi quatre : `general.sticky` (post-it, jaune pâle), `general.callout` (bulle), `general.text` (texte libre, sans contour, pas en gras), `general.step-number` (disque à l'encre du thème, texte blanc en gras). Une autre forme donne l'avertissement `Forme inconnue` et se dessine en `general.sticky`.
+- Dessinées au-dessus de tout et comprises dans le cadrage du dessin. Dans l'éditeur, les tuiles Annotation de la palette créent une note ; elle se déplace, se redimensionne, prend un format et son texte se modifie sur place comme une boîte, mais elle ne se relie pas.
+
 ## Propriétés, classes et règles d'affichage
 
 Le schéma peut porter des **données** (des propriétés nom / valeur sur les objets) et des **règles** qui en tirent l'affichage, comme la mise en forme conditionnelle de Lucidchart. Les propriétés et les classes sont du **sens** (`model`), les règles de l'**affichage** (`layout`).
@@ -261,19 +276,21 @@ Le thème fixe les couleurs du schéma ; il se choisit **par bloc** (`layout.the
 | `encre` | Noir et gris seulement, sobre, adapté à l'impression | `#161616` |
 | `brique` | Encre brun chaud | `#3A2622` |
 
-- **Thème personnalisé** : `theme` peut aussi être une définition, écrite dans le bloc. Toutes les clés sauf `name` sont facultatives ; une couleur absente vient du thème de base.
+- **Thèmes personnalisés** (`layout.themes`) : définitions gardées dans le bloc, par id ; `theme` désigne celui en vigueur. Passer à un autre thème ne change que `theme` : les définitions restent. Toutes les clés sauf `name` sont facultatives ; une couleur absente vient du thème de base.
 
   ```yaml
   layout:
-    theme:
-      name: Maison            # nom affiché
-      base: ardoise           # thème de départ : ardoise (défaut), encre, brique
-      ink: "#1F3A5F"          # texte, contours, flèches
-      fill: "#FFFFFF"         # fond des boîtes
-      palette: ["#FFFFFF", "#1F3A5F", "#C2410C"]   # nuancier de l'éditeur (24 couleurs au plus)
+    theme: maison             # thème en vigueur : un nom prédéfini ou un id de layout.themes
+    themes:
+      maison: { name: Maison, base: ardoise, ink: "#1F3A5F", fill: "#FFFFFF", palette: ["#FFFFFF", "#1F3A5F", "#C2410C"] }
+      nuit: { name: Nuit, base: encre }
   ```
 
-  Une couleur mal écrite (attendu `#RRVVBB`) ou une base inconnue donne un avertissement ; la valeur est ignorée. Dans l'éditeur, le menu Thème propose « Créer un thème… » (à partir du thème en cours) puis un petit éditeur : nom, encre, fond, nuancier (ajouter, changer, retirer une couleur).
+  `name` : nom affiché ; `base` : thème de départ (`ardoise` par défaut, `encre`, `brique`) ; `ink` : texte, contours, flèches ; `fill` : fond des boîtes ; `palette` : nuancier de l'éditeur (24 couleurs au plus). Un id suit la règle habituelle des id et ne peut pas être le nom d'un thème prédéfini (`ardoise`, `encre`, `brique`) : c'est une erreur. Une couleur mal écrite (attendu `#RRVVBB`) ou une base inconnue donne un avertissement ; la valeur est ignorée.
+
+  Toujours accepté : une définition écrite directement comme valeur de `theme` (blocs plus anciens), rendue de la même façon. L'éditeur la range dans `layout.themes` dès qu'on change de thème ou qu'on la modifie : elle n'est jamais perdue.
+
+  Dans l'éditeur, le menu Thème liste les thèmes prédéfinis, puis ceux du bloc, puis « Créer un thème… » (à partir du thème en cours, ajouté à `layout.themes` sous un id tiré de son nom, par exemple `mon-theme`, `mon-theme-2`). Suit un petit éditeur du thème personnalisé en vigueur : nom, encre, fond, nuancier (ajouter, changer, retirer une couleur), et « Supprimer ce thème » (le schéma revient à la base du thème ; cela s'annule).
 - Sans `theme`, Ardoise s'applique et rien n'est écrit dans le bloc.
 - Un thème inconnu donne l'avertissement « Thème inconnu » et le rendu retombe sur Ardoise.
 - Dans l'éditeur, le cartel affiche le thème quand rien n'est sélectionné ; le changer redessine tout le schéma, conserve les réglages de format, écrit `layout.theme` et s'annule comme le reste. Le nuancier propose les couleurs du thème en vigueur, puis les couleurs ajoutées au schéma (`layout.colors` : les 7 dernières choisies hors thème dans l'éditeur, écrites dans le bloc ; le × au survol en retire une, les objets gardent leur couleur) ; la pastille « Thème » revient à la couleur du thème ; « + » ouvre un sélecteur de couleur en HEX.
@@ -288,13 +305,15 @@ Le thème fixe les couleurs du schéma ; il se choisit **par bloc** (`layout.the
 
 Dans Obsidian, les commandes *Vérifier*, *Exporter*, *Recalculer* et *Repartir de zéro* lisent la note **sur le disque** et écrivent en dernier un fichier de statut (`noteSha256`, empreinte du texte lu) : voir le [README du plugin](../apps/obsidian-plugin/README.md), « Commandes sur la note active ».
 
-### Les 11 types d'anomalies
+### Les 13 types d'anomalies
 
 | Type | Gravité | Règle | Indication (`hint`) |
 |---|---|---|---|
 | `node_outside_zone` | erreur | une boîte sort, même en partie, du cadre de son parent | agrandir le parent du côté concerné (`layout.nodes.<parent>.x/y/w/h`) |
 | `zone_overlap` | erreur | deux conteneurs frères (zones, groupes) se chevauchent | décaler le second, dessiné au-dessus, de la largeur ou hauteur du recouvrement, avec son contenu figé |
-| `text_overflow` | erreur | le texte d'une boîte, tel que dessiné (lignes repliées dans la largeur réelle), sort de la boîte de plus de 0,5 px ; pour une forme à icône au-dessus du texte, aussi quand la place laissée à l'icône tombe sous son minimum | élargir ou agrandir la boîte du nombre de pixels qui manque (`layout.nodes.<id>.w/h`) |
+| `node_overlap` | erreur | deux boîtes sœurs, dont au moins une n'est pas un conteneur, se chevauchent | décaler la seconde, dessinée au-dessus, du recouvrement plus 10 px, avec son contenu figé |
+| `node_too_close` | avertissement | marge extérieure trop faible : deux boîtes sœurs à moins de 10 px l'une de l'autre, ou une boîte à moins de 10 px du bord de son parent ou du bas de son titre | décaler la seconde boîte pour laisser 10 px ; pour le parent, l'agrandir du côté concerné |
+| `text_overflow` | erreur | le texte d'une boîte, tel que dessiné (lignes repliées dans la largeur réelle), sort de plus de 0,5 px de la boîte moins les **marges intérieures de sa forme** (dessus du cylindre, tête de la personne C4, onglets…) ; pour une forme à icône au-dessus du texte, aussi quand la place laissée à l'icône tombe sous son minimum | élargir ou agrandir la boîte du nombre de pixels qui manque (`layout.nodes.<id>.w/h`) |
 | `edge_crosses_node` | erreur | une flèche traverse une boîte ou un groupe qui n'est ni sa source, ni sa cible, ni un de leurs ancêtres ; le fond d'une **zone** n'est pas un obstacle | accrocher la flèche du côté de la source qui fait face à la cible (`sourcePort`), en retirant les `points` figés ; seulement si cela change le tracé (aucune indication quand la flèche a déjà cette accroche et pas de `points`) |
 | `edge_crosses_zone_title` | avertissement | une flèche coupe le titre d'une zone dont ni la source ni la cible ne fait partie | aucune |
 | `label_overlaps_node` | avertissement | le libellé d'une flèche couvre une boîte ou un groupe, **sa source et sa cible comprises** (un libellé plus long que sa flèche déborde sur ses extrémités) ; ne comptent pas les zones ni les conteneurs de la flèche (ancêtres de la source ou de la cible) | `labelPos` à 24 px du milieu du tracé, du premier côté libre : ni boîte (extrémités comprises), ni titre de zone ou de groupe, ni autre libellé (aucune indication si aucun côté n'est libre) |
@@ -306,7 +325,7 @@ Dans Obsidian, les commandes *Vérifier*, *Exporter*, *Recalculer* et *Repartir 
 
 Précisions :
 
-- Tolérances : pour les textes (`text_overflow`) et les libellés de flèches (`label_overlaps_node`, `label_overlaps_zone_title`, `label_overlaps_label`), un débordement ou un chevauchement de 0,5 px ou moins ne compte pas ; pour `node_outside_zone` et `zone_overlap`, tout dépassement ou recouvrement compte, même d'un pixel.
+- Tolérances : pour les textes (`text_overflow`) et les libellés de flèches (`label_overlaps_node`, `label_overlaps_zone_title`, `label_overlaps_label`), un débordement ou un chevauchement de 0,5 px ou moins ne compte pas ; pour `node_outside_zone`, `zone_overlap` et `node_overlap`, tout dépassement ou recouvrement compte, même d'un pixel. Le placement automatique laisse des marges plus larges (40 px entre boîtes, 20 px dans une zone) que le seuil de `node_too_close`.
 - `direct` est la distance en ligne droite entre les **centres** de la source et de la cible ; `length` est la longueur du tracé.
 - Les **calques masqués** figurent dans la géométrie (`hidden: true`) mais ne sont pas contrôlés, sauf avec `--all-layers` (`allLayers` dans l'API).
 - Les contrôles sur les tracés (`edge_crosses_node`, `edge_crosses_zone_title`, `edge_detour`, `edge_crossings`) et sur les libellés ne portent que sur les flèches dont le tracé est exact.
@@ -397,7 +416,7 @@ L'éditeur (plugin Obsidian, puis app Confluence) se manipule comme draw.io ; il
 - Revenir à l'état initial (Annuler jusqu'au début) rend le texte d'origine à l'identique.
 - **Copier / Coller / Dupliquer** (Ctrl/Cmd+C, V, D) : copie les boîtes sélectionnées avec le contenu des zones et les relations **entre** éléments copiés (pas celles vers l'extérieur). Le collage crée de nouveaux éléments (`id` = `<type>-<n>`) avec `name`, `tech`, `description`, `ref`, propriétés, classes, forme, taille et format ; il est décalé de 20 px à chaque collage. Dans le même schéma, la copie va dans le même conteneur (ou le même calque) que l'original ; dans un autre schéma, dans le conteneur sous la copie. Les relations collées ont un tracé automatique.
 - **Pinceau** (🖌) : prend le format de la sélection ; l'objet sélectionné ensuite le reçoit, en **remplaçant** son format. Double-clic sur le pinceau : il reste actif jusqu'à Échap. D'une boîte vers une flèche (ou l'inverse), seuls les réglages communs passent (contour, épaisseur, trait, couleur du texte). Ctrl/Cmd+Maj+C / Ctrl/Cmd+Maj+V : copier / coller le style.
-- **Flèches** : épaisseur par préréglages (1 à 4) ou valeur libre (`style.width`) ; **Sens** : vers la cible (défaut), double sens (`style.start: block`) ou sans pointe (`style.end: none`) ; **Inverser le sens** échange `from` et `to` dans le modèle. Les coudes des flèches sont légèrement arrondis (rayon 6 px ; `style.rounded: 0` pour des angles vifs).
+- **Flèches** : épaisseur par préréglages (1 à 4) ou valeur libre (`style.width`) ; **Sens** : vers la cible (défaut), double sens (`style.start: open` ; la pointe par défaut est ouverte) ou sans pointe (`style.end: none`) ; **Inverser le sens** échange `from` et `to` dans le modèle. Les coudes des flèches sont légèrement arrondis (rayon 6 px ; `style.rounded: 0` pour des angles vifs).
 - **Déplacer la vue** : glisser sur le fond déplace tout le schéma (curseur main) ; Maj + glisser trace le rectangle de sélection. Les boutons main / flèche des commandes de vue inversent ce choix (mémorisé).
 - **Changer de zone** : lâcher une boîte sur une zone (ou un groupe) la range dans cette zone (la zone cible est surlignée) ; la lâcher dans le vide hors de sa zone la sort au premier niveau, dans le calque de sa zone d'origine. Dans le YAML, l'élément (avec ses enfants et ses commentaires) est déplacé dans `children` de la nouvelle zone ou dans `model.elements` ; relations et positions ne changent pas.
 - Non autorisé à la souris en V1 : dupliquer par Ctrl+glisser.
@@ -415,7 +434,7 @@ Pour la synchronisation, chaque bloc a trois empreintes SHA-256 calculées sur u
 Quand un bloc a été modifié des deux côtés (vault et Confluence) depuis une version commune `base` :
 
 - **Modèle** : modifié d'un seul côté → ce côté gagne ; modifié des deux côtés à l'identique → rien à faire ; modifié différemment → **conflit**, signalé par élément (`/model/elements/<id>`, à toute profondeur), par relation (`/model/relations/<id>`) ou par champ (`/title`, `/description`…).
-- **Mise en page**, par entrée puis par champ : modifiée d'un seul côté → ce côté gagne ; des deux côtés à l'identique → rien à faire ; même champ modifié différemment → **conflit** `{ key, field }` ; supprimée d'un côté et modifiée de l'autre → conflit `{ key, field: "*" }`.
+- **Mise en page**, par entrée puis par champ : modifiée d'un seul côté → ce côté gagne ; des deux côtés à l'identique → rien à faire ; même champ modifié différemment → **conflit** `{ key, field }` (`key` = `notes.<id>` pour une annotation) ; supprimée d'un côté et modifiée de l'autre → conflit `{ key, field: "*" }`.
 - En cas de conflit, le texte proposé garde la valeur locale (`ours`) et applique tout ce qui est fusionnable.
 - Le texte de départ est celui du côté dont le modèle gagne : ses commentaires et sa mise en forme sont conservés.
 

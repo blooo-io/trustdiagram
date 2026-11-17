@@ -300,41 +300,25 @@
       "additionalProperties": false,
       "properties": {
         "theme": {
-          "description": "Thème du schéma : un nom (ardoise, encre, brique) ou un thème personnalisé.",
+          "description": "Thème du schéma : un nom (ardoise, encre, brique), l'id d'un thème de layout.themes, ou un thème personnalisé écrit sur place (ancienne forme).",
           "oneOf": [
             {
               "type": "string"
             },
             {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "name"
-              ],
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "base": {
-                  "type": "string"
-                },
-                "ink": {
-                  "type": "string"
-                },
-                "fill": {
-                  "type": "string"
-                },
-                "palette": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "maxItems": 24
-                }
-              }
+              "$ref": "#/$defs/themeSpec"
             }
           ]
+        },
+        "themes": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/id"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/themeSpec"
+          },
+          "description": "Thèmes personnalisés du bloc, par id (pas le nom d'un thème prédéfini) ; layout.theme en désigne un."
         },
         "colors": {
           "type": "array",
@@ -394,6 +378,84 @@
           "additionalProperties": {
             "$ref": "#/$defs/edgeLayout"
           }
+        },
+        "notes": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/id"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/noteLayout"
+          },
+          "description": "Annotations (post-it, bulle, texte libre, numéro d'étape) : dessin seul, hors du modèle."
+        }
+      }
+    },
+    "themeSpec": {
+      "description": "Thème personnalisé : part d'un thème de base et en remplace des couleurs.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base": {
+          "type": "string"
+        },
+        "ink": {
+          "type": "string"
+        },
+        "fill": {
+          "type": "string"
+        },
+        "palette": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 24
+        }
+      }
+    },
+    "noteLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "w",
+        "h",
+        "shape"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "h": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shape": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)*$",
+          "description": "general.callout, general.sticky, general.text ou general.step-number."
+        },
+        "text": {
+          "type": "string"
+        },
+        "style": {
+          "$ref": "#/$defs/style"
         }
       }
     },

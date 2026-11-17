@@ -1,0 +1,160 @@
+trustdiagram: 1
+id: shapes-general
+kind: flow
+title: General shapes — reference render
+description: Every shape of the General family at its default size, the annotations and the containers.
+model:
+  elements:
+    - { id: box, type: system, name: "Rectangle" }
+    - { id: rounded, type: system, name: "Rounded rectangle" }
+    - { id: cylinder, type: datastore, name: "Database" }
+    - { id: queue, type: queue, name: "Message queue" }
+    - { id: document, type: component, name: "Document" }
+    - { id: cloud, type: external, name: "Cloud" }
+    - { id: person, type: person, name: "Person" }
+    - { id: hexagon, type: component, name: "Hexagon" }
+    - { id: folder, type: component, name: "Folder" }
+    - { id: ellipse, type: system, name: "Ellipse" }
+    - { id: diamond, type: component, name: "Diamond" }
+    - { id: note, type: component, name: "Note" }
+    - { id: square, type: system, name: "Square" }
+    - { id: rounded-square, type: system, name: "Rounded square" }
+    - { id: circle, type: system, name: "Circle" }
+    - { id: half-circle, type: system, name: "Half circle" }
+    - { id: quarter-circle, type: system, name: "Quarter circle" }
+    - { id: triangle, type: system, name: "Triangle" }
+    - { id: right-triangle, type: system, name: "Right triangle" }
+    - { id: parallelogram, type: system, name: "Parallelogram" }
+    - { id: trapezoid, type: system, name: "Trapezoid" }
+    - { id: pentagon, type: system, name: "Pentagon" }
+    - { id: heptagon, type: system, name: "Heptagon" }
+    - { id: octagon, type: system, name: "Octagon" }
+    - { id: star, type: system, name: "Star" }
+    - { id: burst, type: system, name: "Burst" }
+    - { id: ring, type: system, name: "Ring" }
+    - { id: arc, type: system, name: "Arc" }
+    - { id: block-arrow, type: system, name: "Block arrow" }
+    - { id: double-arrow, type: system, name: "Double arrow" }
+    - { id: up-arrow, type: system, name: "Up arrow" }
+    - { id: chevron, type: system, name: "Chevron" }
+    - { id: notched-arrow, type: system, name: "Notched arrow" }
+    - { id: u-turn, type: system, name: "U-turn arrow" }
+    - { id: circular-arrow, type: system, name: "Circular arrow" }
+    - { id: pentagon-arrow, type: system, name: "Pentagon arrow" }
+    - { id: cube, type: system, name: "Cube" }
+    - { id: horizontal-cylinder, type: datastore, name: "Horizontal cylinder" }
+    - { id: cone, type: system, name: "Cone" }
+    - { id: pyramid, type: system, name: "Pyramid" }
+    - { id: cross, type: system, name: "Cross" }
+    - { id: x-cross, type: system, name: "X cross" }
+    - { id: heart, type: system, name: "Heart" }
+    - { id: moon, type: system, name: "Moon" }
+    - { id: brace, type: system, name: "Brace" }
+    - { id: brackets, type: system, name: "Brackets" }
+    - { id: line, type: system, name: "Line" }
+    - { id: tape, type: system, name: "Tape" }
+    - { id: terminator, type: system, name: "Start / end" }
+    - { id: input-output, type: system, name: "Input / output" }
+    - { id: step, type: system, name: "Step" }
+    - { id: subprocess, type: system, name: "Subprocess" }
+    - { id: documents, type: component, name: "Multiple documents" }
+    - { id: team, type: person, name: "Team" }
+    - { id: card, type: system, name: "Card" }
+    - { id: table, type: datastore, name: "Table" }
+    - { id: icon-users, type: person, name: "People" }
+    - { id: icon-building, type: external, name: "Organisation" }
+    - { id: icon-mail, type: system, name: "Email" }
+    - { id: icon-file, type: system, name: "File" }
+    - { id: icon-lock, type: system, name: "Security" }
+    - { id: icon-globe, type: external, name: "Internet" }
+    - id: zone
+      type: zone
+      name: "Zone"
+    - id: group
+      type: group
+      name: "Group"
+    - id: swimlane
+      type: zone
+      name: "Swimlane"
+      children:
+        - { id: swimlane-child, type: system, name: "Inside swimlane" }
+    - id: framed
+      type: zone
+      name: "Titled frame"
+      children:
+        - { id: framed-child, type: system, name: "Inside titled frame" }
+layout:
+  nodes:
+    box: { x: 55, y: 40, w: 160, h: 60, shape: general.box }
+    rounded: { x: 265, y: 40, w: 160, h: 60, shape: general.rounded }
+    cylinder: { x: 495, y: 40, w: 120, h: 80, shape: general.cylinder }
+    queue: { x: 685, y: 40, w: 160, h: 50, shape: general.queue }
+    document: { x: 915, y: 40, w: 120, h: 80, shape: general.document }
+    cloud: { x: 1105, y: 40, w: 160, h: 90, shape: general.cloud }
+    person: { x: 1365, y: 40, w: 60, h: 80, shape: general.person }
+    hexagon: { x: 1535, y: 40, w: 140, h: 70, shape: general.hexagon }
+    folder: { x: 65, y: 230, w: 140, h: 80, shape: general.folder }
+    ellipse: { x: 275, y: 230, w: 140, h: 70, shape: general.ellipse }
+    diamond: { x: 495, y: 230, w: 120, h: 80, shape: general.diamond }
+    note: { x: 695, y: 230, w: 140, h: 80, shape: general.note }
+    square: { x: 935, y: 230, w: 80, h: 80, shape: general.square }
+    rounded-square: { x: 1145, y: 230, w: 80, h: 80, shape: general.rounded-square }
+    circle: { x: 1355, y: 230, w: 80, h: 80, shape: general.circle }
+    half-circle: { x: 1545, y: 230, w: 120, h: 60, shape: general.half-circle }
+    quarter-circle: { x: 95, y: 420, w: 80, h: 80, shape: general.quarter-circle }
+    triangle: { x: 295, y: 420, w: 100, h: 80, shape: general.triangle }
+    right-triangle: { x: 480, y: 420, w: 150, h: 100, shape: general.right-triangle }
+    parallelogram: { x: 675, y: 420, w: 180, h: 60, shape: general.parallelogram }
+    trapezoid: { x: 905, y: 420, w: 140, h: 60, shape: general.trapezoid }
+    pentagon: { x: 1125, y: 420, w: 120, h: 120, shape: general.pentagon }
+    heptagon: { x: 1350, y: 420, w: 90, h: 90, shape: general.heptagon }
+    octagon: { x: 1560, y: 420, w: 90, h: 90, shape: general.octagon }
+    star: { x: 85, y: 610, w: 100, h: 100, shape: general.star }
+    burst: { x: 295, y: 610, w: 100, h: 100, shape: general.burst }
+    ring: { x: 515, y: 610, w: 80, h: 80, shape: general.ring }
+    arc: { x: 705, y: 610, w: 120, h: 60, shape: general.arc }
+    block-arrow: { x: 895, y: 610, w: 160, h: 70, shape: general.block-arrow }
+    double-arrow: { x: 1095, y: 610, w: 180, h: 70, shape: general.double-arrow }
+    up-arrow: { x: 1360, y: 610, w: 70, h: 110, shape: general.up-arrow }
+    chevron: { x: 1535, y: 610, w: 140, h: 60, shape: general.chevron }
+    notched-arrow: { x: 50, y: 800, w: 170, h: 70, shape: general.notched-arrow }
+    u-turn: { x: 295, y: 800, w: 100, h: 100, shape: general.u-turn }
+    circular-arrow: { x: 505, y: 800, w: 100, h: 80, shape: general.circular-arrow }
+    pentagon-arrow: { x: 695, y: 800, w: 140, h: 60, shape: general.pentagon-arrow }
+    cube: { x: 915, y: 800, w: 120, h: 90, shape: general.cube }
+    horizontal-cylinder: { x: 1105, y: 800, w: 160, h: 70, shape: general.horizontal-cylinder }
+    cone: { x: 1350, y: 800, w: 90, h: 100, shape: general.cone }
+    pyramid: { x: 1555, y: 800, w: 100, h: 110, shape: general.pyramid }
+    cross: { x: 95, y: 990, w: 80, h: 80, shape: general.cross }
+    x-cross: { x: 305, y: 990, w: 80, h: 80, shape: general.x-cross }
+    heart: { x: 510, y: 990, w: 90, h: 80, shape: general.heart }
+    moon: { x: 725, y: 990, w: 80, h: 80, shape: general.moon }
+    brace: { x: 930, y: 990, w: 90, h: 120, shape: general.brace }
+    brackets: { x: 1115, y: 990, w: 140, h: 70, shape: general.brackets }
+    line: { x: 1325, y: 990, w: 140, h: 40, shape: general.line }
+    tape: { x: 1535, y: 990, w: 140, h: 70, shape: general.tape }
+    terminator: { x: 65, y: 1180, w: 140, h: 50, shape: general.terminator }
+    input-output: { x: 270, y: 1180, w: 150, h: 60, shape: general.input-output }
+    step: { x: 480, y: 1180, w: 150, h: 60, shape: general.step }
+    subprocess: { x: 685, y: 1180, w: 160, h: 60, shape: general.subprocess }
+    documents: { x: 910, y: 1180, w: 130, h: 80, shape: general.documents }
+    team: { x: 1145, y: 1180, w: 80, h: 80, shape: general.team }
+    card: { x: 1315, y: 1180, w: 160, h: 100, shape: general.card }
+    table: { x: 1560, y: 1180, w: 90, h: 70, shape: general.table }
+    icon-users: { x: 90, y: 1370, w: 90, h: 80, shape: general.icon-users }
+    icon-building: { x: 300, y: 1370, w: 90, h: 80, shape: general.icon-building }
+    icon-mail: { x: 510, y: 1370, w: 90, h: 80, shape: general.icon-mail }
+    icon-file: { x: 720, y: 1370, w: 90, h: 80, shape: general.icon-file }
+    icon-lock: { x: 930, y: 1370, w: 90, h: 80, shape: general.icon-lock }
+    icon-globe: { x: 1140, y: 1370, w: 90, h: 80, shape: general.icon-globe }
+    zone: { x: 40, y: 1560, w: 400, h: 300, shape: general.zone }
+    group: { x: 500, y: 1560, w: 400, h: 300, shape: general.group }
+    swimlane: { x: 960, y: 1560, w: 480, h: 160, shape: general.swimlane }
+    swimlane-child: { x: 1000, y: 1620, w: 160, h: 60, shape: general.box }
+    framed: { x: 1500, y: 1560, w: 320, h: 200, shape: general.framed }
+    framed-child: { x: 1540, y: 1620, w: 160, h: 60, shape: general.box }
+  notes:
+    n-sticky: { x: 40, y: 1920, w: 140, h: 110, shape: general.sticky, text: "Sticky note annotation" }
+    n-callout: { x: 260, y: 1920, w: 160, h: 70, shape: general.callout, text: "Callout annotation" }
+    n-text: { x: 480, y: 1920, w: 160, h: 40, shape: general.text, text: "Free text annotation" }
+    n-step: { x: 700, y: 1920, w: 36, h: 36, shape: general.step-number, text: "1" }

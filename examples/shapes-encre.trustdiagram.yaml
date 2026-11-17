@@ -1,0 +1,37 @@
+trustdiagram: 1
+id: shapes-encre
+kind: flow
+title: Shape sample — encre theme
+description: A sample of General shapes and two annotations drawn with the encre theme.
+model:
+  elements:
+    - { id: box, type: system, name: "Rectangle" }
+    - { id: cylinder, type: datastore, name: "Database" }
+    - { id: cloud, type: external, name: "Cloud" }
+    - { id: person, type: person, name: "Person" }
+    - { id: star, type: system, name: "Star" }
+    - { id: cube, type: system, name: "Cube" }
+    - { id: chevron, type: system, name: "Chevron" }
+    - { id: terminator, type: system, name: "Start / end" }
+    - { id: documents, type: component, name: "Multiple documents" }
+    - { id: card, type: system, name: "Card" }
+    - { id: table, type: datastore, name: "Table" }
+    - { id: icon-lock, type: system, name: "Security" }
+layout:
+  theme: encre
+  nodes:
+    box: { x: 55, y: 40, w: 160, h: 60, shape: general.box }
+    cylinder: { x: 285, y: 40, w: 120, h: 80, shape: general.cylinder }
+    cloud: { x: 475, y: 40, w: 160, h: 90, shape: general.cloud }
+    person: { x: 735, y: 40, w: 60, h: 80, shape: general.person }
+    star: { x: 85, y: 230, w: 100, h: 100, shape: general.star }
+    cube: { x: 285, y: 230, w: 120, h: 90, shape: general.cube }
+    chevron: { x: 485, y: 230, w: 140, h: 60, shape: general.chevron }
+    terminator: { x: 695, y: 230, w: 140, h: 50, shape: general.terminator }
+    documents: { x: 70, y: 420, w: 130, h: 80, shape: general.documents }
+    card: { x: 265, y: 420, w: 160, h: 100, shape: general.card }
+    table: { x: 510, y: 420, w: 90, h: 70, shape: general.table }
+    icon-lock: { x: 720, y: 420, w: 90, h: 80, shape: general.icon-lock }
+  notes:
+    n-sticky: { x: 40, y: 670, w: 140, h: 110, shape: general.sticky, text: "Sticky note annotation" }
+    n-callout: { x: 260, y: 670, w: 160, h: 70, shape: general.callout, text: "Callout annotation" }

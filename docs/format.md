@@ -107,6 +107,21 @@ layout:
 - Each entry fits **on one line** (YAML flow style) to keep the section short and diffs readable.
 - An entry whose id no longer exists in `model` is **orphaned**: it produces a warning, is ignored in the render and is kept by the merge.
 
+### Annotations (`layout.notes`)
+
+Annotations comment the drawing: sticky notes, speech bubbles, free text, step numbers. They are **not part of the model**: a reader (human or LLM) who only reads `model` sees the architecture without them. They are not elements: no relations, no auto layout, no properties, no rules, no layout check.
+
+```yaml
+layout:
+  notes:                                         # key = note id (own namespace, may repeat an element id)
+    n1: { x: 40, y: 300, w: 160, h: 70, shape: general.sticky, text: "To be checked with security" }
+    n2: { x: 10, y: 10, w: 36, h: 36, shape: general.step-number, text: "1", style: { fill: "#0E7C66" } }
+```
+
+- `x`, `y`, `w`, `h` required (absolute coordinates); `text` optional (`\n` = line break); `style` = the same readable keys as a box.
+- `shape`, one of four: `general.sticky` (sticky note, pale yellow), `general.callout` (speech bubble), `general.text` (free text, no outline, not bold), `general.step-number` (disc in the theme ink, white bold text). Another shape gives the warning `Unknown shape` and is drawn as `general.sticky`.
+- Drawn above everything else and included in the drawing frame. In the editor, the Annotation tiles of the palette create a note; it moves, resizes, takes a format and its text is edited in place like a box, but it cannot be connected.
+
 ## Properties, classes and display rules
 
 A diagram can carry **data** (name / value properties on objects) and **rules** that derive the display from it, like conditional formatting in Lucidchart. Properties and classes are **meaning** (`model`); rules are **display** (`layout`).
@@ -261,19 +276,21 @@ The theme sets the diagram colors; it is chosen **per block** (`layout.theme`). 
 | `encre` | Black and grays only, sober, suited to printing | `#161616` |
 | `brique` | Warm brown ink | `#3A2622` |
 
-- **Custom theme**: `theme` can also be a definition, written in the block. All keys except `name` are optional; a missing color comes from the base theme.
+- **Custom themes** (`layout.themes`): definitions kept in the block, by id; `theme` names the active one. Switching to another theme only changes `theme`: the definitions stay. All keys except `name` are optional; a missing color comes from the base theme.
 
   ```yaml
   layout:
-    theme:
-      name: Maison            # displayed name
-      base: ardoise           # starting theme: ardoise (default), encre, brique
-      ink: "#1F3A5F"          # text, outlines, arrows
-      fill: "#FFFFFF"         # box fill
-      palette: ["#FFFFFF", "#1F3A5F", "#C2410C"]   # editor swatches (24 colors at most)
+    theme: maison             # active theme: a standard name or an id of layout.themes
+    themes:
+      maison: { name: Maison, base: ardoise, ink: "#1F3A5F", fill: "#FFFFFF", palette: ["#FFFFFF", "#1F3A5F", "#C2410C"] }
+      nuit: { name: Nuit, base: encre }
   ```
 
-  A badly written color (expected `#RRGGBB`) or an unknown base gives a warning; the value is ignored. In the editor, the Theme menu offers "Create a theme…" (starting from the current theme), then a small editor: name, ink, fill, swatches (add, change, remove a color).
+  `name`: displayed name; `base`: starting theme (`ardoise` by default, `encre`, `brique`); `ink`: text, outlines, arrows; `fill`: box fill; `palette`: editor swatches (24 colors at most). An id follows the usual id rule and cannot be a standard theme name (`ardoise`, `encre`, `brique`): that is an error. A badly written color (expected `#RRGGBB`) or an unknown base gives a warning; the value is ignored.
+
+  Still accepted: a definition written directly as the value of `theme` (older blocks), rendered the same way. The editor moves it into `layout.themes` as soon as the theme is changed or edited, so it is never lost.
+
+  In the editor, the Theme menu lists the standard themes, then the block's themes, then "Create a theme…" (starting from the current theme, added to `layout.themes` under an id taken from its name, e.g. `mon-theme`, `mon-theme-2`). A small editor follows for the active custom theme: name, ink, fill, swatches (add, change, remove a color), and "Delete this theme" (the diagram goes back to the theme's base; it can be undone).
 - Without `theme`, Ardoise applies and nothing is written to the block.
 - An unknown theme gives the warning `Unknown theme: "…"` (in French: « Thème inconnu ») and the render falls back to Ardoise (Slate in the English interface).
 - In the editor, the Format panel shows the theme when nothing is selected; changing it redraws the whole diagram, keeps the formatting settings, writes `layout.theme` and can be undone like everything else. The swatches offer the colors of the current theme, then the colors added to the diagram (`layout.colors`: the last 7 colors picked outside the theme in the editor, written to the block; the × on hover removes one, objects keep their color); the "Theme" swatch goes back to the theme color; "+" opens a HEX color picker.
@@ -288,13 +305,15 @@ The theme sets the diagram colors; it is chosen **per block** (`layout.theme`). 
 
 In Obsidian, the *Check*, *Export*, *Recompute* and *Start over* commands read the note **from disk** and write a status file last (`noteSha256`, hash of the text read): see the [plugin README](../apps/obsidian-plugin/README.md), "Commands on the active note".
 
-### The 11 anomaly types
+### The 13 anomaly types
 
 | Type | Severity | Rule | Hint (`hint`) |
 |---|---|---|---|
 | `node_outside_zone` | error | a box extends, even partly, outside its parent's frame | enlarge the parent on the side concerned (`layout.nodes.<parent>.x/y/w/h`) |
 | `zone_overlap` | error | two sibling containers (zones, groups) overlap | shift the second one, drawn on top, by the width or height of the overlap, with its pinned content |
-| `text_overflow` | error | a box's text, as drawn (lines wrapped to the real width), extends outside the box by more than 0.5 px; for an icon shape with the icon above the text, also when the room left for the icon falls below its minimum | widen or enlarge the box by the missing number of pixels (`layout.nodes.<id>.w/h`) |
+| `node_overlap` | error | two sibling boxes, at least one of them not a container, overlap | shift the second one, drawn on top, by the overlap plus 10 px, with its pinned content |
+| `node_too_close` | warning | outer margin too small: two sibling boxes less than 10 px apart, or a box less than 10 px from the edge of its parent or the bottom of its title | shift the second box to leave 10 px; for the parent, enlarge it on that side |
+| `text_overflow` | error | a box's text, as drawn (lines wrapped to the real width), extends by more than 0.5 px outside the box minus the **inner margins of its shape** (top of the cylinder, head of the C4 person, tabs…); for an icon shape with the icon above the text, also when the room left for the icon falls below its minimum | widen or enlarge the box by the missing number of pixels (`layout.nodes.<id>.w/h`) |
 | `edge_crosses_node` | error | an arrow crosses a box or a group that is neither its source, nor its target, nor one of their ancestors; the background of a **zone** is not an obstacle | attach the arrow on the side of the source that faces the target (`sourcePort`), removing the pinned `points`; only if this changes the path (no hint when the arrow already has this attachment and no `points`) |
 | `edge_crosses_zone_title` | warning | an arrow cuts through the title of a zone that neither the source nor the target belongs to | none |
 | `label_overlaps_node` | warning | an arrow label covers a box or a group, **its source and target included** (a label longer than its arrow spills over its ends); zones and the arrow's containers (ancestors of the source or the target) do not count | `labelPos` 24 px from the middle of the path, on the first free side: no box (ends included), no zone or group title, no other label (no hint if no side is free) |
@@ -306,7 +325,7 @@ In Obsidian, the *Check*, *Export*, *Recompute* and *Start over* commands read t
 
 Details:
 
-- Tolerances: for text (`text_overflow`) and arrow labels (`label_overlaps_node`, `label_overlaps_zone_title`, `label_overlaps_label`), an overflow or overlap of 0.5 px or less does not count; for `node_outside_zone` and `zone_overlap`, any overflow or overlap counts, even by one pixel.
+- Tolerances: for text (`text_overflow`) and arrow labels (`label_overlaps_node`, `label_overlaps_zone_title`, `label_overlaps_label`), an overflow or overlap of 0.5 px or less does not count; for `node_outside_zone`, `zone_overlap` and `node_overlap`, any overflow or overlap counts, even by one pixel. Automatic layout leaves wider margins (40 px between boxes, 20 px inside a zone) than the `node_too_close` threshold.
 - `direct` is the straight-line distance between the **centers** of the source and the target; `length` is the path length.
 - **Hidden layers** appear in the geometry (`hidden: true`) but are not checked, except with `--all-layers` (`allLayers` in the API).
 - Path checks (`edge_crosses_node`, `edge_crosses_zone_title`, `edge_detour`, `edge_crossings`) and label checks only cover arrows whose path is exact.
@@ -397,7 +416,7 @@ The editor (Obsidian plugin, then Confluence app) works like draw.io; it writes 
 - Going back to the initial state (Undo all the way) restores the original text exactly.
 - **Copy / Paste / Duplicate** (Ctrl/Cmd+C, V, D): copies the selected boxes with the content of zones and the relations **between** copied elements (not those to the outside). Pasting creates new elements (`id` = `<type>-<n>`) with `name`, `tech`, `description`, `ref`, properties, classes, shape, size and formatting; it is offset by 20 px on each paste. In the same diagram, the copy goes into the same container (or the same layer) as the original; in another diagram, into the container under the copy. Pasted relations have an automatic path.
 - **Format painter** (🖌): picks up the formatting of the selection; the next selected object receives it, **replacing** its formatting. Double-click the format painter: it stays active until Esc. From a box to an arrow (or the reverse), only the common settings carry over (outline, thickness, line, text color). Ctrl/Cmd+Shift+C / Ctrl/Cmd+Shift+V: copy / paste the style.
-- **Arrows**: thickness through presets (1 to 4) or a free value (`style.width`); **Direction**: toward the target (default), both ways (`style.start: block`) or no arrowhead (`style.end: none`); **Reverse direction** swaps `from` and `to` in the model. Arrow bends are slightly rounded (6 px radius; `style.rounded: 0` for sharp corners).
+- **Arrows**: thickness through presets (1 to 4) or a free value (`style.width`); **Direction**: toward the target (default), both ways (`style.start: open`; the default arrowhead is open) or no arrowhead (`style.end: none`); **Reverse direction** swaps `from` and `to` in the model. Arrow bends are slightly rounded (6 px radius; `style.rounded: 0` for sharp corners).
 - **Pan the view**: dragging on the background moves the whole diagram (hand cursor); Shift + drag draws the selection rectangle. The hand / arrow buttons of the view controls swap this choice (remembered).
 - **Change zone**: dropping a box on a zone (or a group) puts it in that zone (the target zone is highlighted); dropping it on empty space outside its zone moves it to the top level, in the layer of its original zone. In the YAML, the element (with its children and its comments) is moved into the `children` of the new zone or into `model.elements`; relations and positions do not change.
 - Not allowed with the mouse in V1: duplicating with Ctrl+drag.
@@ -415,7 +434,7 @@ For synchronization, each block has three SHA-256 hashes computed on **canonical
 When a block has been changed on both sides (vault and Confluence) since a common `base` version:
 
 - **Model**: changed on one side only → that side wins; changed identically on both sides → nothing to do; changed differently → **conflict**, reported per element (`/model/elements/<id>`, at any depth), per relation (`/model/relations/<id>`) or per field (`/title`, `/description`…).
-- **Layout**, per entry then per field: changed on one side only → that side wins; changed identically on both sides → nothing to do; same field changed differently → **conflict** `{ key, field }`; deleted on one side and changed on the other → conflict `{ key, field: "*" }`.
+- **Layout**, per entry then per field: changed on one side only → that side wins; changed identically on both sides → nothing to do; same field changed differently → **conflict** `{ key, field }` (`key` = `notes.<id>` for an annotation); deleted on one side and changed on the other → conflict `{ key, field: "*" }`.
 - In case of conflict, the proposed text keeps the local value (`ours`) and applies everything that can be merged.
 - The starting text is the one from the side whose model wins: its comments and formatting are kept.
 
